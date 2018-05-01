@@ -43,6 +43,9 @@
 #pragma mark Local constants declaration
 
 static NSString *const DEFAULT_STARTING_PAGE = @"index.html";
+static bool newInstall = false;
+static NSString *const STR_TRUE = @"true";
+static NSString *const STR_FALSE = @"false";
 
 @implementation HCPPlugin
 
@@ -450,6 +453,9 @@ static NSString *const DEFAULT_STARTING_PAGE = @"index.html";
  */
 - (void)onBeforeAssetsInstalledOnExternalStorageEvent:(NSNotification *)notification {
     CDVPluginResult *result = [CDVPluginResult pluginResultForNotification:notification];
+    
+    newInstall = true;
+    
     [self invokeDefaultCallbackWithMessage:result];
 }
 
@@ -551,6 +557,13 @@ static NSString *const DEFAULT_STARTING_PAGE = @"index.html";
     // store, that we are ready for installation
     _pluginInternalPrefs.readyForInstallationReleaseVersionName = newConfig.contentConfig.releaseVersion;
     [_pluginInternalPrefs saveToUserDefaults];
+    
+    if( newInstall )
+      ((NSMutableDictionary *)notification.userInfo)[kHCPEventUserInfoApplicationNewInstall] = STR_TRUE;
+    else
+      ((NSMutableDictionary *)notification.userInfo)[kHCPEventUserInfoApplicationNewInstall] = STR_FALSE;
+
+    newInstall = false;
     
     // send notification to the associated callback
     CDVPluginResult *pluginResult = [CDVPluginResult pluginResultForNotification:notification];

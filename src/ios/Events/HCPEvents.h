@@ -73,6 +73,10 @@ extern NSString *const kHCPEventUserInfoTaskIdKey;
  */
 extern NSString *const kHCPEventUserInfoApplicationConfigKey;
 
+
+extern NSString *const kHCPEventUserInfoApplicationNewInstall;
+
+
 /**
  *  Helper class tor create plugin specific notifications about work process (download or installation).
  */

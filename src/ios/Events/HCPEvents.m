@@ -22,6 +22,7 @@ NSString *const kHCPBundleAssetsInstallationErrorEvent = @"chcp_assetsInstallati
 NSString *const kHCPEventUserInfoErrorKey = @"error";
 NSString *const kHCPEventUserInfoTaskIdKey = @"taskId";
 NSString *const kHCPEventUserInfoApplicationConfigKey = @"appConfig";
+NSString *const kHCPEventUserInfoApplicationNewInstall = @"newInstall";
 
 @implementation HCPEvents
 

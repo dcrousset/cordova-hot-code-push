@@ -2,7 +2,7 @@ package com.nordnetab.chcp.main;
 
 import android.content.Context;
 import android.os.Handler;
-import android.text.TextUtils;
+import android.text.TextUtils; 
 import android.util.Log;
 
 import com.nordnetab.chcp.main.config.ApplicationConfig;
@@ -13,7 +13,7 @@ import com.nordnetab.chcp.main.config.PluginInternalPreferences;
 import com.nordnetab.chcp.main.events.AssetsInstallationErrorEvent;
 import com.nordnetab.chcp.main.events.AssetsInstalledEvent;
 import com.nordnetab.chcp.main.events.BeforeAssetsInstalledEvent;
-import com.nordnetab.chcp.main.events.BeforeInstallEvent;
+import com.nordnetab.chcp.main.events.BeforeInstallEvent; 
 import com.nordnetab.chcp.main.events.NothingToInstallEvent;
 import com.nordnetab.chcp.main.events.NothingToUpdateEvent;
 import com.nordnetab.chcp.main.events.UpdateDownloadErrorEvent;
@@ -74,6 +74,8 @@ public class HotCodePushPlugin extends CordovaPlugin {
     private ChcpXmlConfig chcpXmlConfig;
     private PluginFilesStructure fileStructure;
 
+	private boolean newInstall = false;
+	
     private CallbackContext installJsCallback;
     private CallbackContext jsDefaultCallback;
     private CallbackContext downloadJsCallback;
@@ -660,6 +662,8 @@ public class HotCodePushPlugin extends CordovaPlugin {
         Log.d("CHCP", "Dispatching before assets installed event");
         final PluginResult result = PluginResultHelper.pluginResultFromEvent(event);
 
+        newInstall = true;
+
         sendMessageToDefaultCallback(result);
     }
 
@@ -730,6 +734,8 @@ public class HotCodePushPlugin extends CordovaPlugin {
         pluginInternalPrefs.setReadyForInstallationReleaseVersionName(newContentConfig.getReleaseVersion());
         pluginInternalPrefsStorage.storeInPreference(pluginInternalPrefs);
 
+		event.data().put( "newInstall", newInstall );
+        newInstall = false;
         PluginResult jsResult = PluginResultHelper.pluginResultFromEvent(event);
 
         // notify JS

@@ -15,6 +15,7 @@ static NSString *const ACTION_KEY = @"action";
 
 static NSString *const DATA_KEY = @"data";
 static NSString *const DATA_USER_INFO_CONFIG = @"config";
+static NSString *const DATA_NEW_INSTALL = @"newInstall";
 
 static NSString *const ERROR_KEY = @"error";
 static NSString *const ERROR_USER_INFO_CODE = @"code";
@@ -28,14 +29,27 @@ static NSString *const ERROR_USER_INFO_DESCRIPTION = @"description";
     HCPApplicationConfig *appConfig = notification.userInfo[kHCPEventUserInfoApplicationConfigKey];
     NSError *error = notification.userInfo[kHCPEventUserInfoErrorKey];
     NSString *action = notification.name;
+    NSString *newInstall = notification.userInfo[kHCPEventUserInfoApplicationNewInstall];
     
-    return [CDVPluginResult pluginResultWithActionName:action applicationConfig:appConfig error:error];
+    return [CDVPluginResult pluginResultWithActionName:action applicationConfig:appConfig error:error newInstall:newInstall];
 }
 
 + (CDVPluginResult *)pluginResultWithActionName:(NSString *)action applicationConfig:(HCPApplicationConfig *)appConfig error:(NSError *)error {
+    return [self pluginResultWithActionName:action applicationConfig:appConfig error:error newInstall:nil];
+}
+
+
++ (CDVPluginResult *)pluginResultWithActionName:(NSString *)action applicationConfig:(HCPApplicationConfig *)appConfig
+                                          error:(NSError *)error newInstall:(NSString *)newInstall {
     NSDictionary *data = nil;
     if (appConfig) {
-        data = @{DATA_USER_INFO_CONFIG: [appConfig toJson]};
+		if( newInstall )
+	        data = @{
+				DATA_USER_INFO_CONFIG: [appConfig toJson],
+				DATA_NEW_INSTALL: newInstall
+			};
+		else
+	        data = @{ DATA_USER_INFO_CONFIG: [appConfig toJson] };
     }
     
     return [self pluginResultWithActionName:action data:data error:error];
