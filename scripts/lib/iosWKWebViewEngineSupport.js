@@ -15,6 +15,8 @@ var projectRoot;
 var projectName;
 var iosPlatformPath;
 
+var xcode = require('xcode');
+
 module.exports = {
   setWKWebViewEngineMacro: setWKWebViewEngineMacro
 };
@@ -70,6 +72,7 @@ function loadProjectFile() {
   try {
     return loadProjectFile_cordova_7_and_above();
   } catch(e) {
+      console.log( e );
   }
   
   try {
@@ -99,7 +102,9 @@ function loadProjectFile_cordova_5_and_6() {
 
 function loadProjectFile_cordova_7_and_above() {
   var pbxPath = path.join(iosPlatformPath, projectName + '.xcodeproj', 'project.pbxproj');
-  var xcodeproj = context.requireCordovaModule('xcode').project(pbxPath);
+
+  //var xcodeproj = context.requireCordovaModule('xcode').project(pbxPath);
+  var xcodeproj = xcode.project(pbxPath);
   xcodeproj.parseSync();
 
   var saveProj = function() {
