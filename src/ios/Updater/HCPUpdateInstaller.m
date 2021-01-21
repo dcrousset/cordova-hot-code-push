@@ -57,7 +57,9 @@
         *error = [NSError errorWithCode:kHCPNothingToInstallErrorCode description:@"Nothing to install"];
         return NO;
     }
-    
+
+    NSLog(@"chcp - installVersion");
+
     // launch installation
     id<HCPWorker> installationTask = [[HCPInstallationWorker alloc] initWithNewVersion:newVersion currentVersion:currentVersion];
     [self execute:installationTask];

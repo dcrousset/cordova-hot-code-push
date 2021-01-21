@@ -57,7 +57,7 @@ static NSString *const STORE_URL_TEMPLATE = @"https://itunes.apple.com/app/%@";
     NSError *error = nil;
     id json = [NSJSONSerialization JSONObjectWithData:jsonData options:kNilOptions error:&error];
     if (error) {
-        NSLog(@"Can't read application config from bundle. %@", [error underlyingErrorLocalizedDesription]);
+        NSLog(@"chcp - Can't read application config from bundle. %@", [error underlyingErrorLocalizedDesription]);
         return nil;
     }
     

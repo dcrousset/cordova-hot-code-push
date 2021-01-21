@@ -56,7 +56,7 @@ static NSString *const CHCP_MANIFEST_FILE_PATH = @"chcp.manifest";
     NSError *error = nil;
     BOOL success = [_pluginRootFolder setResourceValue:[NSNumber numberWithBool:YES] forKey:NSURLIsExcludedFromBackupKey error:&error];
     if (!success) {
-        NSLog(@"Error excluding %@ from backup %@", [_pluginRootFolder lastPathComponent], error);
+        NSLog(@"chcp - Error excluding %@ from backup %@", [_pluginRootFolder lastPathComponent], error);
     }
     
     return _pluginRootFolder;

@@ -59,7 +59,7 @@
 #pragma mark Private API
 
 - (void)logError:(NSError *)error {
-    NSLog(@"%@", [error.userInfo[NSUnderlyingErrorKey] localizedDescription]);
+    NSLog(@"chcp - %@", [error.userInfo[NSUnderlyingErrorKey] localizedDescription]);
 }
 
 @end

@@ -78,7 +78,7 @@
         }
         
         if (!shouldIgnore) {
-            NSLog(@"Removing old release content: %@", releaseFolderURL.path.lastPathComponent);
+            NSLog(@"chcp - Removing old release content: %@", releaseFolderURL.path.lastPathComponent);
             [fm removeItemAtURL:releaseFolderURL error:nil];
         }
     }

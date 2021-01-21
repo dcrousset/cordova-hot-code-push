@@ -91,7 +91,7 @@ static NSUInteger const TIMEOUT = 300;
 
 - (void)launchDownloadTaskForFile:(HCPManifestFile *)file {
     NSURL *url = [_contentURL URLByAppendingPathComponent:file.name];
-    NSLog(@"Starting file download: %@", url.absoluteString);
+    NSLog(@"chcp - Starting file download: %@", url.absoluteString);
     
     [[_session downloadTaskWithURL:url] resume];
 }
@@ -112,7 +112,7 @@ static NSUInteger const TIMEOUT = 300;
         return NO;
     }
     
-    NSLog(@"Hash %@ doesn't match the checksum %@", dataHash, checksum);
+    NSLog(@"chcp - Hash %@ doesn't match the checksum %@", dataHash, checksum);
     
     return YES;
 }

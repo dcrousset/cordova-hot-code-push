@@ -1,23 +1,25 @@
 //
-//  CDVWKWebViewEngine+HCPPlugin_ReadAccessURL.m
+//  CDVWebViewEngine+HCPPlugin_ReadAccessURL.m
 //
-//  Created by Nikolay Demyankov on 04.04.16.
+//  Created by Nikolay Demyankov on 04.04.16.,
+//  fix to cordova-ios 6.1.1 (no mode CDVWK*)
 //
 
-#if WK_WEBVIEW_ENGINE_IS_USED
-
-#import "CDVWKWebViewEngine+HCPPlugin_ReadAccessURL.h"
+#import "CDVWebViewEngine+HCPPlugin_ReadAccessURL.h"
 #import <objc/message.h>
 #import "HCPFilesStructure.h"
 
 #define CDV_WKWEBVIEW_FILE_URL_LOAD_SELECTOR @"loadFileURL:allowingReadAccessToURL:"
 
-@implementation CDVWKWebViewEngine (HCPPlugin_ReadAccessURL)
+@implementation CDVWebViewEngine (HCPPlugin_ReadAccessURL)
 
-- (id)loadRequest:(NSURLRequest*)request
-{
+- (id)loadRequest:(NSURLRequest*)request {
+    NSLog( @"chcp - OVERRIDE - CDVWKWebViewEngine+HCPPlugin_ReadAccessURL !!!" );
     if ([self canLoadRequest:request]) { // can load, differentiate between file urls and other schemes
+        NSLog( @"chcp - canLoadRequest" );
         if (request.URL.fileURL) {
+            NSLog( @"chcp - contains request.URL.fileURL" );
+
             SEL wk_sel = NSSelectorFromString(CDV_WKWEBVIEW_FILE_URL_LOAD_SELECTOR);
             
             // by default we set allowingReadAccessToURL property to the plugin's root folder,
@@ -31,6 +33,7 @@
             
             return ((id (*)(id, SEL, id, id))objc_msgSend)(self.engineWebView, wk_sel, request.URL, readAccessUrl);
         } else {
+            NSLog( @"chcp - no fileURL" );
             return [(WKWebView*)self.engineWebView loadRequest:request];
         }
     } else { // can't load, print out error
@@ -50,5 +53,3 @@
 }
 
 @end
-
-#endif

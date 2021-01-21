@@ -49,13 +49,15 @@
 - (void)runWithComplitionBlock:(void (^)(void))updateInstallationComplitionBlock {
     [self dispatchBeforeInstallEvent];
 
+    NSLog(@"chcp - runWithComplitionBlock");
+
     NSError *error = nil;
     if (![self initBeforeRun:&error] ||
         ![self isUpdateValid:&error] ||
         ![self copyFilesFromCurrentReleaseToNewRelease:&error] ||
         ![self deleteUnusedFiles:&error] ||
         ![self moveDownloadedFilesToWwwFolder:&error]) {
-            NSLog(@"%@. Error code %ld", [error underlyingErrorLocalizedDesription], (long)error.code);
+            NSLog(@"chcp - %@. Error code %ld", [error underlyingErrorLocalizedDesription], (long)error.code);
             [self cleanUpOnFailure];
             [self dispatchEventWithError:error];
         
@@ -98,6 +100,7 @@
  *  Send event that update was successfully installed
  */
 - (void)dispatchSuccessEvent {
+    NSLog(@"chcp - dispatchSuccessEvent");
     NSNotification *notification = [HCPEvents notificationWithName:kHCPUpdateIsInstalledEvent
                                                  applicationConfig:_newConfig
                                                             taskId:self.workerId];
@@ -197,6 +200,8 @@
 
 - (BOOL)copyFilesFromCurrentReleaseToNewRelease:(NSError **)error {
     *error = nil;
+
+    NSLog(@"chcp - copyFilesFromCurrentReleaseToNewRelease");
     
     // just in case check if previous www folder exists; if it does - remove it before copying new stuff
     if ([_fileManager fileExistsAtPath:_newReleaseFS.wwwFolder.path]) {
@@ -205,11 +210,13 @@
     
     // copy items from current www folder to the new www folder
     if (![_fileManager copyItemAtURL:_currentReleaseFS.wwwFolder toURL:_newReleaseFS.wwwFolder error:error]) {
-        NSLog(@"Installation error! Failed to copy files from %@ to %@", _currentReleaseFS.wwwFolder.path, _newReleaseFS.wwwFolder.path);
+        NSLog(@"chcp - Installation error! Failed to copy files from %@ to %@", _currentReleaseFS.wwwFolder.path, _newReleaseFS.wwwFolder.path);
         *error = [NSError errorWithCode:kHCPFailedToCopyFilesFromPreviousReleaseErrorCode descriptionFromError:*error];
         return NO;
     }
-    
+
+    NSLog(@"chcp - _newReleaseFS.wwwFolder:%@", _newReleaseFS.wwwFolder );
+
     return YES;
 }
 
@@ -222,11 +229,12 @@
  */
 - (BOOL)deleteUnusedFiles:(NSError **)error {
     *error = nil;
+    NSLog( @"chcp - deleteUnusedFiles" );
     NSArray *deletedFiles = _manifestDiff.deletedFiles;
     for (HCPManifestFile *deletedFile in deletedFiles) {
         NSURL *filePath = [_newReleaseFS.wwwFolder URLByAppendingPathComponent:deletedFile.name];
         if (![_fileManager removeItemAtURL:filePath error:error]) {
-            NSLog(@"CHCP Warinig! Failed to delete file: %@", filePath.absoluteString);
+            NSLog(@"chcp - Warning! Failed to delete file: %@", filePath.absoluteString);
         }
     }
     
@@ -245,23 +253,26 @@
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSArray *updatedFiles = _manifestDiff.updateFileList;
     NSString *errorMsg = nil;
+
+    NSLog( @"chcp - moveDownloadedFilesToWwwFolder" );
+    NSLog( @"chcp - updatedFiles:%@", updatedFiles );
     for (HCPManifestFile *manifestFile in updatedFiles) {
         // Force the release of the memory allocated during file copy
         @autoreleasepool {
-            // determine paths to the file in installation and www folders
+            // NSLog( @"chcp - determine paths to the file in installation and www folders" );
             NSURL *pathInInstallationFolder = [_newReleaseFS.downloadFolder URLByAppendingPathComponent:manifestFile.name];
             NSURL *pathInWwwFolder = [_newReleaseFS.wwwFolder URLByAppendingPathComponent:manifestFile.name];
             
-            // if file already exists in www folder - remove it before copying
             if ([fileManager fileExistsAtPath:pathInWwwFolder.path] && ![fileManager removeItemAtURL:pathInWwwFolder error:error]) {
+                NSLog( @"chcp - file '%@' already exists in www folder - remove it before copying", pathInWwwFolder.path );
                 errorMsg = [NSString stringWithFormat:@"Failed to delete old version of the file %@ : %@. Installation failed",
                             manifestFile.name, [(*error) underlyingErrorLocalizedDesription]];
                 break;
             }
             
-            // if needed - create subfolders for the new file
             NSURL *parentDirectoryPathInWwwFolder = [pathInWwwFolder URLByDeletingLastPathComponent];
             if (![fileManager fileExistsAtPath:parentDirectoryPathInWwwFolder.path]) {
+                NSLog( @"chcp - create subfolders '%@' for the new file", parentDirectoryPathInWwwFolder.path );
                 if (![fileManager createDirectoryAtPath:parentDirectoryPathInWwwFolder.path withIntermediateDirectories:YES attributes:nil error:error]) {
                     errorMsg = [NSString stringWithFormat:@"Failed to create folder structure for file %@ : %@. Installation failed.",
                                 manifestFile.name, [(*error) underlyingErrorLocalizedDesription]];
@@ -269,7 +280,7 @@
                 }
             }
             
-            // copy new file into www folder
+            NSLog( @"chcp - copy new file '%@' into www folder '%@'", pathInInstallationFolder, pathInWwwFolder );
             if (![fileManager moveItemAtURL:pathInInstallationFolder toURL:pathInWwwFolder error:error]) {
                 errorMsg = [NSString stringWithFormat:@"Failed to copy file %@ into www folder: %@. Installation failed.",
                             manifestFile.name, [(*error) underlyingErrorLocalizedDesription]];
@@ -279,6 +290,7 @@
     }
     
     if (errorMsg) {
+        NSLog( @"chcp - errorMsg:%@", errorMsg );
         *error = [NSError errorWithCode:kHCPFailedToCopyNewContentFilesErrorCode description:errorMsg];
     }
     
@@ -289,6 +301,7 @@
  *  Save loaded configs to the www folder. They are now our current configs.
  */
 - (void)saveNewConfigsToWwwFolder {
+    NSLog(@"chcp - saveNewConfigsToWwwFolder");
     [_manifestStorage store:_newManifest inFolder:_newReleaseFS.wwwFolder];
     [_configStorage store:_newConfig inFolder:_newReleaseFS.wwwFolder];
 }
@@ -304,6 +317,7 @@
  *  Cleanup on successfull installation.
  */
 - (void)cleanUpOnSucess {
+    NSLog(@"chcp - cleanUpOnSucess");
     [_fileManager removeItemAtURL:_newReleaseFS.downloadFolder error:nil];
 }
 

@@ -31,7 +31,7 @@
     NSURL *cordovaConfigURL = [NSURL fileURLWithPath:[NSBundle pathToCordovaConfigXml]];
     NSXMLParser *configParser = [[NSXMLParser alloc] initWithContentsOfURL:cordovaConfigURL];
     if (configParser == nil) {
-        NSLog(@"Failed to initialize XML parser.");
+        NSLog(@"chcp - Failed to initialize XML parser.");
         return nil;
     }
     

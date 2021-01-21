@@ -154,7 +154,7 @@ static NSString *const STR_FALSE = @"false";
         [_pluginInternalPrefs saveToUserDefaults];
     }
     
-    NSLog(@"Currently running release version %@", _pluginInternalPrefs.currentReleaseVersionName);
+    NSLog(@"chcp - Currently running release version %@", _pluginInternalPrefs.currentReleaseVersionName);
     
     // init file structure for www files
     _filesStructure = [[HCPFilesStructure alloc] initWithReleaseVersion:_pluginInternalPrefs.currentReleaseVersionName];
@@ -168,6 +168,7 @@ static NSString *const STR_FALSE = @"false";
  *  @return <code>YES</code> if download process started; <code>NO</code> otherwise
  */
 - (BOOL)_fetchUpdate:(NSString *)callbackId withOptions:(HCPFetchUpdateOptions *)options {
+    NSLog(@"chcp - _fetchUpdate");
     if (!_isPluginReadyForWork) {
         return NO;
     }
@@ -186,6 +187,7 @@ static NSString *const STR_FALSE = @"false";
     [[HCPUpdateLoader sharedInstance] executeDownloadRequest:request error:&error];
     
     if (error) {
+        NSLog(@"chcp - _fetchUpdate - ERROR");
         if (callbackId) {
             CDVPluginResult *errorResult = [CDVPluginResult pluginResultWithActionName:kHCPUpdateDownloadErrorEvent
                                                                      applicationConfig:nil
@@ -194,6 +196,9 @@ static NSString *const STR_FALSE = @"false";
         }
         
         return NO;
+    }
+    else {
+        NSLog(@"chcp - _fetchUpdate - SUCCESS");
     }
     
     if (callbackId) {
@@ -214,13 +219,19 @@ static NSString *const STR_FALSE = @"false";
     if (!_isPluginReadyForWork) {
         return NO;
     }
-    
+
+    NSLog(@"chcp - _installUpdate");
+
     NSString *newVersion = _pluginInternalPrefs.readyForInstallationReleaseVersionName;
     NSString *currentVersion = _pluginInternalPrefs.currentReleaseVersionName;
-    
+
+    NSLog(@"chcp - newVersion:%@", newVersion );
+    NSLog(@"chcp - currentVersion:%@", currentVersion );
+
     NSError *error = nil;
     [[HCPUpdateInstaller sharedInstance] installVersion:newVersion currentVersion:currentVersion error:&error];
     if (error) {
+        NSLog(@"chcp - ERROR" );
         if (error.code == kHCPNothingToInstallErrorCode) {
             NSNotification *notification = [HCPEvents notificationWithName:kHCPNothingToInstallEvent
                                                          applicationConfig:nil
@@ -238,6 +249,9 @@ static NSString *const STR_FALSE = @"false";
         
         return NO;
     }
+    else {
+        NSLog(@"chcp - SUCCESS" );
+    }
     
     if (callbackID) {
         _installationCallback = callbackID;
@@ -252,14 +266,18 @@ static NSString *const STR_FALSE = @"false";
  *  @param url url to load
  */
 - (void)loadURL:(NSString *)url {
+    NSLog( @"chcp - loadUrl" );
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         NSURL *loadURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@", _filesStructure.wwwFolder.absoluteString, url]];
+        NSLog( @"chcp - requestWithURL:%@", loadURL );
         NSURLRequest *request = [NSURLRequest requestWithURL:loadURL
                                                  cachePolicy:NSURLRequestReloadIgnoringCacheData
                                              timeoutInterval:10000];
 #ifdef __CORDOVA_4_0_0
+        NSLog( @"chcp - cordova-ios >= 4 - loadRequest:%@", request );
         [self.webViewEngine loadRequest:request];
 #else
+        NSLog( @"chcp - cordova-ios < 4 - loadRequest:%@", request );
         [self.webView loadRequest:request];
 #endif
     }];
@@ -285,7 +303,7 @@ static NSString *const STR_FALSE = @"false";
     if ([self.viewController isKindOfClass:[CDVViewController class]]) {
         ((CDVViewController *)self.viewController).wwwFolderName = _filesStructure.wwwFolder.absoluteString;
     } else {
-        NSLog(@"HotCodePushError: Can't make starting page to be from external storage. Main controller should be of type CDVViewController.");
+        NSLog(@"chcp - HotCodePushError: Can't make starting page to be from external storage. Main controller should be of type CDVViewController.");
     }
 }
 
@@ -466,6 +484,7 @@ static NSString *const STR_FALSE = @"false";
  */
 - (void)onAssetsInstalledOnExternalStorageEvent:(NSNotification *)notification {
     // update stored config with new application build version
+    NSLog(@"chcp - onAssetsInstalledOnExternalStorageEvent");
     _pluginInternalPrefs.appBuildVersion = [NSBundle applicationBuildVersion];
     _pluginInternalPrefs.wwwFolderInstalled = YES;
     [_pluginInternalPrefs saveToUserDefaults];
@@ -482,6 +501,7 @@ static NSString *const STR_FALSE = @"false";
     if (_pluginXmlConfig.isUpdatesAutoDownloadAllowed &&
         ![HCPUpdateLoader sharedInstance].isDownloadInProgress &&
         ![HCPUpdateInstaller sharedInstance].isInstallationInProgress) {
+            NSLog(@"chcp - onAssetsInstalledOnExternalStorageEvent - _fetchUpdate");
         [self _fetchUpdate:nil withOptions:nil];
     }
 }
@@ -508,7 +528,7 @@ static NSString *const STR_FALSE = @"false";
  */
 - (void)onUpdateDownloadErrorEvent:(NSNotification *)notification {
     NSError *error = notification.userInfo[kHCPEventUserInfoErrorKey];
-    NSLog(@"Error during update: %@", [error underlyingErrorLocalizedDesription]);
+    NSLog(@"chcp - Error during update: %@", [error underlyingErrorLocalizedDesription]);
     
     // send notification to the associated callback
     CDVPluginResult *pluginResult = [CDVPluginResult pluginResultForNotification:notification];
@@ -530,7 +550,7 @@ static NSString *const STR_FALSE = @"false";
  *  @param notification captured notification with event details.
  */
 - (void)onNothingToUpdateEvent:(NSNotification *)notification {
-    NSLog(@"Nothing to update");
+    NSLog(@"chcp - Nothing to update");
     
     // send notification to the associated callback
     CDVPluginResult *pluginResult = [CDVPluginResult pluginResultForNotification:notification];
@@ -552,7 +572,7 @@ static NSString *const STR_FALSE = @"false";
     // new application config from server
     HCPApplicationConfig *newConfig = notification.userInfo[kHCPEventUserInfoApplicationConfigKey];
     
-    NSLog(@"Update is ready for installation: %@", newConfig.contentConfig.releaseVersion);
+    NSLog(@"chcp - Update is ready for installation: %@", newConfig.contentConfig.releaseVersion);
     
     // store, that we are ready for installation
     _pluginInternalPrefs.readyForInstallationReleaseVersionName = newConfig.contentConfig.releaseVersion;
@@ -704,10 +724,10 @@ static NSString *const STR_FALSE = @"false";
     }
     
     if (_pluginInternalPrefs.previousReleaseVersionName.length > 0) {
-        NSLog(@"WWW folder is corrupted, rolling back to previous version.");
+        NSLog(@"chcp - WWW folder is corrupted, rolling back to previous version.");
         [self rollbackToPreviousRelease];
     } else {
-        NSLog(@"WWW folder is corrupted, reinstalling it from bundle.");
+        NSLog(@"chcp - WWW folder is corrupted, reinstalling it from bundle.");
         [self installWwwFolder];
     }
 }
