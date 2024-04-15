@@ -70,6 +70,8 @@ class UpdateLoaderWorker implements WorkerTask {
             return;
         }
 
+        FileDownloader.resetCurrFetchStatus();
+
         // download new application config
         final ApplicationConfig newAppConfig = downloadApplicationConfig(applicationConfigUrl);
         if (newAppConfig == null) {

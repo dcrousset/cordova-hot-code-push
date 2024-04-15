@@ -10,14 +10,16 @@ if "%IOS_PLATFORM_DIR%" == "" (
 
 if "%IOS_PLATFORM_DIR%" neq "" (
     ECHO.
-    ECHO "Copie les changements pour ObjectiveC (IOS)..."
-    xcopy /Y /S src\ios\*.* %IOS_PLATFORM_DIR%\COGNITO\Plugins\cordova-hot-code-push-plugin
+    ECHO "Copie les changements pour ObjectiveC (IOS) to %IOS_PLATFORM_DIR%"
+    xcopy /Y /S src\ios\*.* "%IOS_PLATFORM_DIR%\COGNITO Coach\Plugins\cordova-hot-code-push-plugin"
+    xcopy /Y /S www\*.* "%IOS_PLATFORM_DIR%\www\plugins\cordova-hot-code-push-plugin\www"
 )
 
 if "%ANDROID_PLATFORM_DIR%" neq "" (
     ECHO.
-    ECHO "Copie les changements pour Android..."
-    xcopy /Y /S src\android\src\*.* %ANDROID_PLATFORM_DIR%\src
+    ECHO "Copie les changements pour Android to %ANDROID_PLATFORM_DIR%"
+    xcopy /Y /S src\android\src\*.* %ANDROID_PLATFORM_DIR%\app\src\main\java
+    xcopy /Y /S www\*.* %ANDROID_PLATFORM_DIR%\app\src\main\assets\www\plugins\cordova-hot-code-push-plugin\www
 )
 
 

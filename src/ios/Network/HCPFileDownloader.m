@@ -23,10 +23,37 @@
 @end
 
 static NSUInteger const TIMEOUT = 300;
+static NSString *_currFile;
+static NSUInteger _countDownloaded;
+static NSUInteger _totalToDownload;
 
 @implementation HCPFileDownloader
 
 #pragma mark Public API
+
+
++ (NSString *)getCurrFile {
+  return _currFile;
+}
+
+
++ (NSUInteger)getCountDownloaded {
+  return _countDownloaded;
+}
+
+
++ (NSUInteger)getTotalToDownload {
+  return _totalToDownload;
+}
+
+
+
++ (void)resetCountDownload {
+    _currFile = @"";
+    _countDownloaded = 0;
+    _totalToDownload = 0;
+}
+
 
 - (instancetype)initWithFiles:(NSArray *)filesList srcDirURL:(NSURL *)contentURL dstDirURL:(NSURL *)folderURL requestHeaders:(NSDictionary *)headers {
     self = [super init];
@@ -35,6 +62,7 @@ static NSUInteger const TIMEOUT = 300;
         _contentURL = contentURL;
         _folderURL = folderURL;
         _headers = headers;
+        [HCPFileDownloader resetCountDownload];
     }
     
     return self;
@@ -78,11 +106,13 @@ static NSUInteger const TIMEOUT = 300;
         return;
     }
     
+    _totalToDownload = _filesList.count;
     _downloadCounter++;
     if (_downloadCounter >= _filesList.count) {
         [_session finishTasksAndInvalidate];
         _session = nil;
         _complitionHandler(nil);
+        _countDownloaded = _filesList.count;
         return;
     }
     
@@ -92,8 +122,10 @@ static NSUInteger const TIMEOUT = 300;
 - (void)launchDownloadTaskForFile:(HCPManifestFile *)file {
     NSURL *url = [_contentURL URLByAppendingPathComponent:file.name];
     NSLog(@"chcp - Starting file download: %@", url.absoluteString);
-    
+
+    _currFile = file.name;
     [[_session downloadTaskWithURL:url] resume];
+    _countDownloaded = _downloadCounter;
 }
 
 #pragma Private API

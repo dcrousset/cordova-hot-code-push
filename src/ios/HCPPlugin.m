@@ -155,7 +155,7 @@ static NSString *const STR_FALSE = @"false";
     }
     
     NSLog(@"chcp - Currently running release version %@", _pluginInternalPrefs.currentReleaseVersionName);
-    
+
     // init file structure for www files
     _filesStructure = [[HCPFilesStructure alloc] initWithReleaseVersion:_pluginInternalPrefs.currentReleaseVersionName];
 }
@@ -837,6 +837,22 @@ static NSString *const STR_FALSE = @"false";
     CDVPluginResult *result = [CDVPluginResult pluginResultWithActionName:nil data:data error:nil];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
+
+
+- (void)jsGetFetchStatus:(CDVInvokedUrlCommand *)command {
+    if (!_isPluginReadyForWork) {
+        [self sendPluginNotReadyToWorkMessageForEvent:kHCPUpdateDownloadErrorEvent callbackID:command.callbackId];
+    }
+
+    NSMutableDictionary *data = [[NSMutableDictionary alloc] init];
+    data[@"currFilename"] = [HCPFileDownloader getCurrFile];
+    data[@"countDownloaded"] = [NSNumber numberWithInteger:[HCPFileDownloader getCountDownloaded]];
+    data[@"totalToDownload"] = [NSNumber numberWithInteger:[HCPFileDownloader getTotalToDownload]];
+
+    CDVPluginResult *result = [CDVPluginResult pluginResultWithActionName:nil data:data error:nil];
+    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+}
+
 
 - (void)sendPluginNotReadyToWorkMessageForEvent:(NSString *)eventName callbackID:(NSString *)callbackID {
     NSError *error = [NSError errorWithCode:kHCPAssetsNotYetInstalledErrorCode

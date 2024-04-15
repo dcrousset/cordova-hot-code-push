@@ -27,6 +27,9 @@ import java.util.Map;
  * Helper class to download files.
  */
 public class FileDownloader {
+    public static String _currFile = "";
+    public static int _countDownloaded;
+    public static int _totalToDownload;
 
     /**
      * Download list of files.
@@ -45,12 +48,24 @@ public class FileDownloader {
                                      final String contentFolderUrl,
                                      final List<ManifestFile> files,
                                      final Map<String, String> requestHeaders) throws Exception {
+        _totalToDownload = files.size();
+        _countDownloaded = 0;
         for (ManifestFile file : files) {
+            _currFile = file.name;
             String fileUrl = URLUtility.construct(contentFolderUrl, file.name);
             String filePath = Paths.get(downloadFolder, file.name);
             download(fileUrl, filePath, file.hash, requestHeaders);
+            _countDownloaded++;
         }
     }
+
+
+    public static void resetCurrFetchStatus() {
+      _currFile = "";
+      _countDownloaded = 0;
+      _totalToDownload = 0;
+    }
+
 
     /**
      * Download file from server, save it on the disk and check his hash.

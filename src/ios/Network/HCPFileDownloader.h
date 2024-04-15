@@ -38,4 +38,9 @@ typedef void (^HCPFileDownloadCompletionBlock)(NSError *error);
  */
 - (void)startDownloadWithCompletionBlock:(HCPFileDownloadCompletionBlock)block;
 
++ (NSString *)getCurrFile;
++ (NSUInteger)getCountDownloaded;
++ (NSUInteger)getTotalToDownload;
++ (void)resetCountDownload;
+
 @end

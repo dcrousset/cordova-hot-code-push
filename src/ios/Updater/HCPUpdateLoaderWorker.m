@@ -64,14 +64,18 @@
 // To reduce merge conflicts leaving it as it is for now.
 - (void)runWithComplitionBlock:(void (^)(void))updateLoaderComplitionBlock {
     _complitionBlock = updateLoaderComplitionBlock;
-    
+
+    NSLog(@"chcp - Starting loader worker");
+
     // initialize before the run
     NSError *error = nil;
     if (![self loadLocalConfigs:&error]) {
         [self notifyWithError:error applicationConfig:nil];
         return;
     }
-    
+
+    [HCPFileDownloader resetCountDownload];
+
     HCPDataDownloader *configDownloader = [[HCPDataDownloader alloc] init];
     
     // download new application config

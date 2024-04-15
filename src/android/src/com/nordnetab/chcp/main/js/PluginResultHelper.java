@@ -81,7 +81,13 @@ public class PluginResultHelper {
                 continue;
             }
 
-            dataNode.set(entry.getKey(), factory.textNode(value.toString()));
+            try {
+              int lNumVal = Integer.parseInt( value.toString() );
+              dataNode.set(entry.getKey(), factory.numberNode( lNumVal ));
+            }
+            catch( Exception e ) {
+              dataNode.set(entry.getKey(), factory.textNode(value.toString()));
+            }
         }
 
         return dataNode;

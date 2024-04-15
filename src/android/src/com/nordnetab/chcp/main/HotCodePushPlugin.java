@@ -25,6 +25,7 @@ import com.nordnetab.chcp.main.js.PluginResultHelper;
 import com.nordnetab.chcp.main.model.ChcpError;
 import com.nordnetab.chcp.main.model.PluginFilesStructure;
 import com.nordnetab.chcp.main.model.UpdateTime;
+import com.nordnetab.chcp.main.network.FileDownloader;
 import com.nordnetab.chcp.main.storage.ApplicationConfigStorage;
 import com.nordnetab.chcp.main.storage.IObjectFileStorage;
 import com.nordnetab.chcp.main.storage.IObjectPreferenceStorage;
@@ -256,6 +257,8 @@ public class HotCodePushPlugin extends CordovaPlugin {
             jsIsUpdateAvailableForInstallation(callbackContext);
         } else if (JSAction.GET_VERSION_INFO.equals(action)) {
             jsGetVersionInfo(callbackContext);
+        } else if (JSAction.GET_FETCH_STATUS.equals(action)) {
+            jsGetFetchStatus(callbackContext);
         } else {
             cmdProcessed = false;
         }
@@ -466,6 +469,19 @@ public class HotCodePushPlugin extends CordovaPlugin {
         final PluginResult pluginResult = PluginResultHelper.createPluginResult(null, data, null);
         callback.sendPluginResult(pluginResult);
     }
+
+
+    private void jsGetFetchStatus(final CallbackContext callback) {
+        final Context context = cordova.getActivity();
+        final Map<String, Object> data = new HashMap<String, Object>();
+        data.put("currFilename", FileDownloader._currFile );
+        data.put("countDownloaded", FileDownloader._countDownloaded );
+        data.put("totalToDownload", FileDownloader._totalToDownload );
+
+        final PluginResult pluginResult = PluginResultHelper.createPluginResult(null, data, null);
+        callback.sendPluginResult(pluginResult);
+    }
+
 
     // convenience method
     private void fetchUpdate() {

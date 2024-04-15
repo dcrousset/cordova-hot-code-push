@@ -1,0 +1,12 @@
+#!/bin/sh
+NAME="FIX"
+NAME="${NAME}ME"
+matches=$(git diff --cached ":^.settings" | grep -E "\+.*?$NAME")
+
+if [ "$matches" != "" ]
+then
+        echo "'$NAME' tag is detected somewhere in files to commit."
+        echo "Please fix it before committing."
+        echo "  ${matches}"
+        exit 1
+fi

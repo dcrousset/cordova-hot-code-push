@@ -46,6 +46,13 @@
 - (void)jsFetchUpdate:(CDVInvokedUrlCommand *)command;
 
 /**
+ *  Get fetch status
+ *
+ *  @param command command with which the method is called
+ */
+- (void)jsGetFetchStatus:(CDVInvokedUrlCommand *)command;
+
+/**
  *  Install update if any available.
  *
  *  @param command command with which the method is called

@@ -1,3 +1,6 @@
+// FIXME remettre en commentaire, ne sert qu'a faire du debuggage
+// cordova.define("cordova-hot-code-push-plugin.chcp", function(require, exports, module) {
+// FIN
 
 
 var exec = require('cordova/exec'),
@@ -10,6 +13,7 @@ var exec = require('cordova/exec'),
   pluginNativeMethod = {
     INITIALIZE: 'jsInitPlugin',
     FETCH_UPDATE: 'jsFetchUpdate',
+    GET_FETCH_STATUS: 'jsGetFetchStatus',
     INSTALL_UPDATE: 'jsInstallUpdate',
     CONFIGURE: 'jsConfigure',
     REQUEST_APP_UPDATE: 'jsRequestAppUpdate',
@@ -274,7 +278,21 @@ var chcp = {
    */
   getVersionInfo: function(callback) {
     callNativeMethod(pluginNativeMethod.GET_INFO, null, callback);
+  },
+
+  /**
+   * Get fetching update status
+   *
+   * @param {Callback(error)} callback - fetch status
+   */
+  getFetchStatus: function(callback) {
+    callNativeMethod(pluginNativeMethod.GET_FETCH_STATUS, null, callback);
   }
+
 };
 
 module.exports = chcp;
+
+// FIXME remettre en commentaire, ne sert qu'a faire du debuggage
+// });
+// FIN
