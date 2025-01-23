@@ -17,7 +17,7 @@ var INSTALLATION_FLAG_FILE_NAME = '.npmInstalled';
  * Check if cordova-hcp utility is installed. If not - suggest user to install it.
  */
 function checkCliDependency(ctx) {
-  var result = spawnSync('cordova-hcp', [], { cwd: './plugins/' + ctx.opts.plugin.id });
+  var result = spawnSync('cordova-hcp', [], { cwd: './plugins/' + ctx.opts.plugin.id, shell:true });
   if (!result.error) {
     return;
   }
@@ -76,7 +76,7 @@ module.exports = function(ctx) {
   console.log(JSON.stringify(pluginNpmDependencies, null, 2));
 
   var npm = (process.platform === "win32" ? "npm.cmd" : "npm");
-  var result = spawnSync(npm, ['install', '--production'], { cwd: './plugins/' + ctx.opts.plugin.id });
+  var result = spawnSync(npm, ['install', '--production'], { cwd: './plugins/' + ctx.opts.plugin.id, shell:true });
   if (result.error) {
     throw result.error;
   }
