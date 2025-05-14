@@ -66,7 +66,10 @@ public class HotCodePushPlugin extends CordovaPlugin {
 
     private static final String FILE_PREFIX = "file://";
     private static final String WWW_FOLDER = "www";
-    private static final String LOCAL_ASSETS_FOLDER = "file:///android_asset/www";
+//    private static final String LOCAL_ASSETS_FOLDER = "file:///android_asset/www";
+
+    private String LOCAL_ASSETS_FOLDER;
+    private String FILE_FOLDER;
 
     private String startingPage;
     private IObjectFileStorage<ApplicationConfig> appConfigStorage;
@@ -106,7 +109,50 @@ public class HotCodePushPlugin extends CordovaPlugin {
         fileStructure = new PluginFilesStructure(cordova.getActivity(), pluginInternalPrefs.getCurrentReleaseVersionName());
         appConfigStorage = new ApplicationConfigStorage();
         defaultCallbackStoredResults = new ArrayList<PluginResult>();
+
+        Activity activity = cordova.getActivity();
+        FILE_FOLDER = activity.getFilesDir().getAbsolutePath()+"/";
+
+        String scheme = preferences.getString("scheme", "https").toLowerCase();
+        String hostname = preferences.getString("hostname", "localhost").toLowerCase();
+        LOCAL_ASSETS_FOLDER = scheme + "://" + hostname + '/';
     }
+
+
+    @Override
+    public CordovaPluginPathHandler getPathHandler() {
+        return new CordovaPluginPathHandler( new WebViewAssetLoader.PathHandler() {
+            @Nullable @Override
+            public WebResourceResponse handle( @NonNull String path ) {
+                if( !path.contains( "cordova-hot-code-push-plugin/" ) )
+                    // not for me
+                    return null;
+
+                try {
+                    InputStream is = new FileInputStream( FILE_FOLDER+path );
+                    String mimeType = "text/html";
+                    String extension = MimeTypeMap.getFileExtensionFromUrl(path);
+                    if (extension != null) {
+                        if (path.endsWith(".js") || path.endsWith(".mjs")) {
+                            // Make sure JS files get the proper mimetype to support ES modules
+                            mimeType = "application/javascript";
+                        } else if (path.endsWith(".wasm")) {
+                            mimeType = "application/wasm";
+                        } else {
+                            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+                        }
+                    }
+                    return new WebResourceResponse(mimeType, null, is);
+                }
+                catch( IOException e ){
+                    e.printStackTrace();
+                    LOG.e("HotCodePushPlugin", e.getMessage());
+                    return null;
+                }
+            }
+        });
+    }
+
 
     @Override
     public void onStart() {
@@ -643,8 +689,12 @@ public class HotCodePushPlugin extends CordovaPlugin {
         }
 
         // load index page from the external source
-        external = Paths.get(fileStructure.getWwwFolder(), indexPage);
-        webView.loadUrlIntoView(FILE_PREFIX + external, false);
+//        external = Paths.get(fileStructure.getWwwFolder(), indexPage);
+//        webView.loadUrlIntoView(FILE_PREFIX + external, false);
+
+        String lSubfolder = fileStructure.getWwwFolder().substring( FILE_FOLDER.length() );
+        external = Paths.get(lSubfolder, indexPage);
+        webView.loadUrlIntoView(LOCAL_ASSETS_FOLDER+external, false);
 
         Log.d("CHCP", "Loading external page: " + external);
     }
