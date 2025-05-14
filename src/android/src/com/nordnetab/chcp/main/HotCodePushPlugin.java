@@ -1,9 +1,15 @@
 package com.nordnetab.chcp.main;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
-import android.text.TextUtils; 
+import android.text.TextUtils;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
+import android.webkit.WebResourceResponse;
+
+import androidx.annotation.NonNull;
+import androidx.webkit.WebViewAssetLoader;
 
 import com.nordnetab.chcp.main.config.ApplicationConfig;
 import com.nordnetab.chcp.main.config.ChcpXmlConfig;
@@ -13,7 +19,7 @@ import com.nordnetab.chcp.main.config.PluginInternalPreferences;
 import com.nordnetab.chcp.main.events.AssetsInstallationErrorEvent;
 import com.nordnetab.chcp.main.events.AssetsInstalledEvent;
 import com.nordnetab.chcp.main.events.BeforeAssetsInstalledEvent;
-import com.nordnetab.chcp.main.events.BeforeInstallEvent; 
+import com.nordnetab.chcp.main.events.BeforeInstallEvent;
 import com.nordnetab.chcp.main.events.NothingToInstallEvent;
 import com.nordnetab.chcp.main.events.NothingToUpdateEvent;
 import com.nordnetab.chcp.main.events.UpdateDownloadErrorEvent;
@@ -44,7 +50,9 @@ import org.apache.cordova.ConfigXmlParser;
 import org.apache.cordova.CordovaArgs;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.CordovaPluginPathHandler;
 import org.apache.cordova.CordovaWebView;
+import org.apache.cordova.LOG;
 import org.apache.cordova.PluginResult;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -52,10 +60,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 /**
  * Created by Nikolay Demyankov on 23.07.15.
@@ -78,8 +91,8 @@ public class HotCodePushPlugin extends CordovaPlugin {
     private ChcpXmlConfig chcpXmlConfig;
     private PluginFilesStructure fileStructure;
 
-	private boolean newInstall = false;
-	
+    private boolean newInstall = false;
+
     private CallbackContext installJsCallback;
     private CallbackContext jsDefaultCallback;
     private CallbackContext downloadJsCallback;
@@ -122,8 +135,9 @@ public class HotCodePushPlugin extends CordovaPlugin {
     @Override
     public CordovaPluginPathHandler getPathHandler() {
         return new CordovaPluginPathHandler( new WebViewAssetLoader.PathHandler() {
-            @Nullable @Override
-            public WebResourceResponse handle( @NonNull String path ) {
+            @Nullable
+            @Override
+            public WebResourceResponse handle(@NonNull String path ) {
                 if( !path.contains( "cordova-hot-code-push-plugin/" ) )
                     // not for me
                     return null;
@@ -656,7 +670,7 @@ public class HotCodePushPlugin extends CordovaPlugin {
             pluginInternalPrefs.setCurrentReleaseVersionName(appConfig.getContentConfig().getReleaseVersion());
 
             pluginInternalPrefsStorage.storeInPreference(pluginInternalPrefs);
-			fileStructure.switchToRelease(pluginInternalPrefs.getCurrentReleaseVersionName());
+            fileStructure.switchToRelease(pluginInternalPrefs.getCurrentReleaseVersionName());
         }
 
         AssetsHelper.copyAssetDirectoryToAppDirectory(cordova.getActivity().getApplicationContext(), WWW_FOLDER, fileStructure.getWwwFolder());
@@ -800,7 +814,7 @@ public class HotCodePushPlugin extends CordovaPlugin {
         pluginInternalPrefs.setReadyForInstallationReleaseVersionName(newContentConfig.getReleaseVersion());
         pluginInternalPrefsStorage.storeInPreference(pluginInternalPrefs);
 
-		event.data().put( "newInstall", newInstall );
+        event.data().put( "newInstall", newInstall );
         newInstall = false;
         PluginResult jsResult = PluginResultHelper.pluginResultFromEvent(event);
 
